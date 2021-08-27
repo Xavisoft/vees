@@ -11,6 +11,7 @@ const app = express();
 // middlewares
 const auth = require('./auth');
 
+app.use(express.static('static'));
 app.use(express.json({ 'limit': '20mb' }));
 auth(app);
 

@@ -2,7 +2,7 @@
 'use strict';
 
 const { User } = require('./models');
-const auth = require('auth/backend');
+const auth = require('./modules/auth/backend');
 
 
 async function getHashedPasswordByUsername(email) {

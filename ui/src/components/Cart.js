@@ -14,6 +14,8 @@ import RemoveIcon from '@material-ui/icons/Clear';
 
 import { connect } from 'react-redux';
 import actions from '../actions';
+import request, { getRequestErrorMessage } from '../request';
+
 
 class Cart extends Component {
 
@@ -48,8 +50,23 @@ class Cart extends Component {
 	} 
 
 
-	placeOrder() {
-		alert('Feature coming soon')
+	async placeOrder() {
+
+		const { cart } = this.props;
+
+		if (cart.length === 0)
+			return alert('Your cart is empty');
+		
+		try {
+
+			const response = await request.post('/api/orders/', cart);
+			const { id } = response.data;
+			window.Vees.redirect(`/orders/${id}`);
+			actions.closeCart();
+
+		} catch (err) {
+			alert(getRequestErrorMessage(err));
+		}
 	}
 
 	render() {

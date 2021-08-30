@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { HashRouter as Router, Route, Switch } from 'react-router-dom';
 
 // style-sheets
 import './App.css';
@@ -17,6 +17,9 @@ import Signup from './pages/Signup';
 import RegisterOutlet from './pages/RegisterOutlet';
 import Outlets from './pages/Outlets';
 import Outlet from './pages/Outlet';
+import Order from './pages/Order';
+import MyOrders from './pages/MyOrders';
+import OutletOrders from './pages/OutletOrders';
 
 // state management
 import { Provider } from 'react-redux';
@@ -48,11 +51,19 @@ function App() {
 				<StockUpdateModal />
 				<Cart />
 
-				<Route exact path="/" component={Home} />
-				<Route exact path="/signup" component={Signup} />
-				<Route exact path="/outlets/register" component={RegisterOutlet} />
-				<Route exact path="/outlets" component={Outlets} />
-				<Route exact path="/outlets/:id" component={Outlet} />
+				<Switch>
+
+					<Route exact path="/" component={Home} />
+					<Route exact path="/signup" component={Signup} />
+					<Route exact path="/outlets/register" component={RegisterOutlet} />
+					<Route exact path="/outlets" component={Outlets} />
+					<Route exact path="/outlets/:id" component={Outlet} />
+					<Route exact path="/outlets/:id/orders" component={OutletOrders} />
+					<Route exact path="/orders/:id" component={Order} />
+					<Route exact path="/my-orders" component={MyOrders} />
+
+
+				</Switch>
 
 				
 			</Router>

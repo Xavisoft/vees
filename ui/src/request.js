@@ -14,6 +14,12 @@ function showLoadingIfResponseIsForeground(config) {
 
 }
 
+
+function injectDomain(config) {
+	config.url = 'http://137.184.37.111:8080' + config.url;
+	return config;
+}
+
 function hideLoadingWhenResponseIsReceived(response) {
 	hideLoading();
 	return response;
@@ -37,6 +43,11 @@ function getRequestErrorStatus(error) {
 }
 
 axios.interceptors.request.use(showLoadingIfResponseIsForeground);
+
+// add injectDomain interceptor if compiled
+if (window.location.href.indexOf('file://') === 0)
+	axios.interceptors.request.use(injectDomain);
+
 axios.interceptors.response.use(hideLoadingWhenResponseIsReceived, hideLoadingWhenErrorIsReceived);
 
 auth({ axios });

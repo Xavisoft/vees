@@ -10,7 +10,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import TextField from '@material-ui/core/TextField';
-
+import StockUpdateModal from '../components/StockUpdateModal';
+import { Link } from 'react-router-dom'
 
 class Outlet extends Page {
 
@@ -40,13 +41,45 @@ class Outlet extends Page {
 		alert('Feature coming very soon.')
 	}
 
+	async updateStock(stock) {
 
-	closeAddItemModal() {
-		this._updateState({ addItemModalOpen: false })
+		const itemsMap = new Map();
+		const items = this.state.items.map(item => {
+			itemsMap.set(item.id.toString(), item);
+			return item;
+		});
+
+		for (let i in stock) {
+
+			const { id, quantity } = stock[i];
+			const item = itemsMap.get(id.toString());
+
+			if (item) {
+				console.log({ quantity, number_in_stock: item.number_in_stock})
+				item.number_in_stock += quantity;
+			}
+		}
+
+		await this._updateState({ items });
+
+
 	}
 
-	openAddItemModal() {
-		this._updateState({ addItemModalOpen: true })
+
+	async closeAddItemModal() {
+		await this._updateState({ addItemModalOpen: false })
+	}
+
+	async openAddItemModal() {
+		await this._updateState({ addItemModalOpen: true })
+	}
+
+	async openUpdateStockModal() {
+		await this._updateState({ updateStockModalOpen: true })
+	}
+
+	async closeUpdateStockModal() {
+		await this._updateState({ updateStockModalOpen: false });
 	}
 
 	async fetchData() {
@@ -75,20 +108,25 @@ class Outlet extends Page {
 	}
 
 	state = {
-		addItemModalOpen: false
+		addItemModalOpen: false,
+		updateStockModalOpen: false,
+		items: []
 	}
 
 	_render() {
 
-		const { items, dataFetched, isOwner, name, addItemModalOpen } = this.state;
+		const { items, dataFetched, isOwner, name, addItemModalOpen, updateStockModalOpen } = this.state;
 		const outletID = this.props.match.params.id;
 
 		const fetchData = this.fetchData.bind(this);
 		const openAddItemModal = this.openAddItemModal.bind(this);
 		const closeAddItemModal = this.closeAddItemModal.bind(this);
+		const openUpdateStockModal = this.openUpdateStockModal.bind(this);
+		const closeUpdateStockModal = this.closeUpdateStockModal.bind(this);
 		const addItem = this.addItem.bind(this);
 		const deleteItem = this.deleteItem.bind(this);
 		const editItem = this.editItem.bind(this);
+		const updateStock = this.updateStock.bind(this);
 
 		let dataNotFetchedJSX, noItemsJSX;
 
@@ -125,19 +163,35 @@ class Outlet extends Page {
 				<h3 style={{ color: 'grey', margin: 0, padding: 0 }}>Our Menu</h3>
 			</div>
 
+
+			{
+				isOwner ?  <React.Fragment>
+
+					<AddItemModal open={addItemModalOpen} close={closeAddItemModal} outletID={outletID} addItem={addItem} />
+					<StockUpdateModal open={updateStockModalOpen} close={closeUpdateStockModal} items={items} outletID={outletID} updateStock={updateStock}  />
+
+					<Button color="primary" onClick={openAddItemModal}>
+						ADD ITEM
+					</Button> 
+
+					<Button color="primary" onClick={openUpdateStockModal}>
+						UPDATE STOCK
+					</Button>
+
+					<Button color="primary" component={Link} to={`/outlets/${outletID}/orders`}>
+						VIEW ORDERS
+					</Button>
+
+				</React.Fragment> : undefined
+			}
+
 			{
 				noItemsJSX || items.map(item => {
 					return <Item data={item} isOwner={isOwner} edit={editItem} delete={deleteItem} />
 				})
 			}
 
-			<AddItemModal open={addItemModalOpen} close={closeAddItemModal} outletID={outletID} addItem={addItem} />
-
-			{
-				isOwner ? <Button color="primary" onClick={openAddItemModal}>
-					ADD ITEM
-				</Button> : undefined
-			}
+		
 		</div>
 	}
 }
@@ -178,7 +232,7 @@ class AddItemModal extends Component {
 			const response = await request.post(url, payload);
 			const { id } = response.data;
 
-			this.props.addItem({ ...payload, id });
+			this.props.addItem({ ...payload, id, number_in_stock: 0 });
 
 			// clear
 			this._updateState({

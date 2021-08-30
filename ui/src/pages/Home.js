@@ -61,8 +61,9 @@ class Home extends Page {
 		return <div className={this.props.classes.root}>
 
 			<h1 className="center-align" style={{ margin: '100px 0', fontSize: 50, fontFamily: 'Arial' }}>
-				Welcome To<br />
-					VEE'S
+				WELCOME TO<br />
+					VEE'S<br />
+				CLICK TO EAT
 			</h1>
 
 			<TextField

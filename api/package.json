@@ -8,5 +8,13 @@
     "start": "nodemon ."
   },
   "author": "",
+  "dependencies": {
+    "express": "latest",
+    "bcrypt": "latest",
+    "cors": "latest",
+    "paynow": "latest",
+    "sequelize": "latest",
+    "uuid": "latest"
+  },
   "license": "ISC"
 }

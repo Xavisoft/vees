@@ -27,7 +27,7 @@ class Item extends Component {
 
 	render() {
 
-		const { picture, name, price=0, items_in_stock=0 } = this.props.data;
+		const { picture, name, price=0, number_in_stock=0 } = this.props.data;
 		const { isOwner } = this.props; 
 
 
@@ -45,7 +45,7 @@ class Item extends Component {
 				<h3>${formatPrice(price)}</h3>
 				<span>
 					Items In Stock: <span style={{ color: 'green' }}>
-					{items_in_stock}
+					{number_in_stock}
 					</span>
 				</span>
 

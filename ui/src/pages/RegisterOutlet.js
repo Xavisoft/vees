@@ -33,7 +33,8 @@ class RegisterOutlet extends Page {
 
 		try {
 			const response = await request.post('/api/outlets', data);
-			alert('Outlet created');
+			const { id } = response.data;
+			Page.redirect(`/outlets/${id}`)
 		} catch (err) {
 			alert(getRequestErrorMessage(err));
 		}

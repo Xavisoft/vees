@@ -110,6 +110,10 @@ class Navbar extends Component {
 				route: '/outlets',
 			},
 			{
+				caption: 'My Orders',
+				route: '/my-orders'
+			},
+			{
 				caption: 'cart',
 				onClick: actions.openCart
 			},
@@ -131,7 +135,7 @@ class Navbar extends Component {
 			<Grid container>
 				<Grid item xs={9}>
 					<div style={align}>
-						<h2 style={{ textAlign: 'center' }}>VEE'S</h2>
+						<h2 style={{ textAlign: 'center' }}>CLICK TO EAT</h2>
 					</div>
 				</Grid>
 				<Grid item xs={3}>
@@ -157,7 +161,7 @@ class Navbar extends Component {
 			<Drawer variant="persistant" open={drawerOpened} onClick={closeDrawer} className={classes.drawer}>
 				<List>
 					<ListItem style={{ borderBottom: '1px solid grey'}}>
-						<h2>VEES</h2>
+						<h2>CLICK TO EAT</h2>
 					</ListItem>
 					
 					{

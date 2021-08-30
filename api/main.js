@@ -14,7 +14,7 @@ const auth = require('./auth');
 const cors = require('cors');
 
 const corsOptions = {
-	origin: "null",
+	origin: "*",
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	preflightContinue: false,
 	optionsSuccessStatus: 200,

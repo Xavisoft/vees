@@ -14,7 +14,8 @@
     "cors": "latest",
     "paynow": "latest",
     "sequelize": "latest",
-    "uuid": "latest"
+    "uuid": "latest",
+    "sqlite3": "latest"
   },
   "license": "ISC"
 }

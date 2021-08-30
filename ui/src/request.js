@@ -34,7 +34,7 @@ function getRequestErrorMessage(error={}) {
 	console.log(error);
 	const { response={} } = error;
 	const { data='' } = response;
-	return data.toString() || response.statusText || 'Something went wrong!!'
+	return data.toString() || response.statusText || error.toString() || 'Something went wrong!!'
 }
 
 function getRequestErrorStatus(error) {

@@ -68,7 +68,7 @@ async function getOutlet(req, res) {
 			location: outlet.location
 		}
 
-		res.send(data); console.log(JSON.stringify(data, 0, 3));
+		res.send(data);
 
 	} catch (err) {
 		status_500(err, res);

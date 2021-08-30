@@ -4,6 +4,8 @@
 const User = require('./User');
 const Outlet = require('./Outlet');
 const MenuItem = require('./MenuItem');
+const Order = require('./Order');
+const OrderItem = require('./OrderItem');
 const { Sequelize } = require('sequelize');
 
 
@@ -20,6 +22,9 @@ const sequelize = new Sequelize(`sqlite::${__dirname}/db.sqlite`, { operatorsAli
 User.init(sequelize);
 Outlet.init(sequelize);
 MenuItem.init(sequelize);
+Order.init(sequelize);
+OrderItem.init(sequelize);
+
 
 Outlet.belongsTo(User);
 User.hasMany(Outlet);
@@ -27,6 +32,12 @@ User.hasMany(Outlet);
 MenuItem.belongsTo(Outlet);
 Outlet.hasMany(MenuItem);
 
+
+Order.belongsTo(User)
+Outlet.hasMany(Order)
+User.hasMany(Order)
+Order.hasMany(OrderItem)
+OrderItem.hasOne(MenuItem)
 
 
 
@@ -40,5 +51,7 @@ sequelize.sync({});
 module.exports = {
 	User,
 	Outlet,
-	MenuItem
+	MenuItem,
+	Order,
+	OrderItem
 }

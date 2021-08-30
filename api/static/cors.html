@@ -1,0 +1,23 @@
+
+
+<script type="text/javascript">
+	
+	(async () => {
+
+		try {
+
+			const response = await fetch('http://localhost:8080/cors', {
+				method: 'POST',
+				data: 'name=1'
+			});
+
+			console.log(response)
+			console.log(response.headers);
+
+			const text = await response.text();
+			console.log({ text });
+		} catch (err) {
+			console.log(err);
+		}
+	})()
+</script>

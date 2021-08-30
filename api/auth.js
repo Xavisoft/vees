@@ -7,6 +7,8 @@ const auth = require('./modules/auth/backend');
 
 async function getHashedPasswordByUsername(email) {
 
+	email = email.toLowerCase();
+
 	const user = await User.findOne({ where: { email }});
 
 	if (!user)

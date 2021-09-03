@@ -37,8 +37,23 @@ class Outlet extends Page {
 		}
 	}
 
-	editItem(itemID) {
-		alert('Feature coming very soon.')
+	async editItem(itemID) {
+		let itemToBeEdited;
+		const itemModalMode = 'edit';
+
+		for (let i in this.state.items) {
+			const item = this.state.items[i];
+
+			if (item.id.toString() === itemID.toString()) {
+				itemToBeEdited = item;
+				break;
+			}
+		}
+
+		if (itemToBeEdited) {
+			await this._updateState({ itemToBeEdited, itemModalMode });
+			await this.openItemModal();
+		}
 	}
 
 	async updateStock(stock) {
@@ -66,11 +81,11 @@ class Outlet extends Page {
 	}
 
 
-	async closeAddItemModal() {
+	async closeItemModal() {
 		await this._updateState({ addItemModalOpen: false })
 	}
 
-	async openAddItemModal() {
+	async openItemModal() {
 		await this._updateState({ addItemModalOpen: true })
 	}
 
@@ -96,11 +111,30 @@ class Outlet extends Page {
 		}
 	}
 
-	addItem(item) {
+	async addItem(item) {
 		const { items } = this.state;
 		items.push(item);
 
-		this._updateState({ items });
+		await this._updateState({ items });
+	}
+
+	async updateItem(itemID, updates) {
+
+		const items = this.state.items.map(item => {
+
+			if (item.id.toString() === itemID.toString()) {
+
+				for (let prop in updates) {
+					item[prop] = updates[prop];
+				}
+			}
+
+			return item;
+
+		});
+
+		await this._updateState({ items });
+
 	}
 
 	_componentDidMount() {
@@ -110,23 +144,25 @@ class Outlet extends Page {
 	state = {
 		addItemModalOpen: false,
 		updateStockModalOpen: false,
-		items: []
+		items: [],
+		itemModalMode: 'add'
 	}
 
 	_render() {
 
-		const { items, dataFetched, isOwner, name, addItemModalOpen, updateStockModalOpen } = this.state;
+		const { items, dataFetched, isOwner, name, addItemModalOpen, updateStockModalOpen, itemModalMode, itemToBeEdited } = this.state;
 		const outletID = this.props.match.params.id;
 
 		const fetchData = this.fetchData.bind(this);
-		const openAddItemModal = this.openAddItemModal.bind(this);
-		const closeAddItemModal = this.closeAddItemModal.bind(this);
+		const openItemModal = this.openItemModal.bind(this);
+		const closeItemModal = this.closeItemModal.bind(this);
 		const openUpdateStockModal = this.openUpdateStockModal.bind(this);
 		const closeUpdateStockModal = this.closeUpdateStockModal.bind(this);
 		const addItem = this.addItem.bind(this);
 		const deleteItem = this.deleteItem.bind(this);
 		const editItem = this.editItem.bind(this);
 		const updateStock = this.updateStock.bind(this);
+		const updateItem = this.updateItem.bind(this);
 
 		let dataNotFetchedJSX, noItemsJSX;
 
@@ -167,10 +203,10 @@ class Outlet extends Page {
 			{
 				isOwner ?  <React.Fragment>
 
-					<AddItemModal open={addItemModalOpen} close={closeAddItemModal} outletID={outletID} addItem={addItem} />
+					<ItemModal open={addItemModalOpen} close={closeItemModal} outletID={outletID} addItem={addItem} updateItem={updateItem} mode={itemModalMode} item={itemToBeEdited} />
 					<StockUpdateModal open={updateStockModalOpen} close={closeUpdateStockModal} items={items} outletID={outletID} updateStock={updateStock}  />
 
-					<Button color="primary" onClick={openAddItemModal}>
+					<Button color="primary" onClick={openItemModal}>
 						ADD ITEM
 					</Button> 
 
@@ -202,7 +238,7 @@ export default Outlet;
 
 // local components
 
-class AddItemModal extends Component {
+class ItemModal extends Component {
 
 
 	state = {
@@ -212,6 +248,7 @@ class AddItemModal extends Component {
 	async submit() {
 
 		const { picture, name, price } = this.state.values;
+		const { outletID } = this.props;
 
 		if (!name)
 			return alert('Name is required');
@@ -223,30 +260,53 @@ class AddItemModal extends Component {
 		if (!picture)
 			return alert('Picture is required');
 
-		const payload = { name, price, picture };
-		const { outletID } = this.props;
-		const url = `/api/outlets/${outletID}/items`;
+		if (this.props.mode === 'edit') {
 
-		try {
+			const payload = {};
+			const item = this.props.item;
 
-			const response = await request.post(url, payload);
-			const { id } = response.data;
+			if (item.picture !== picture)
+				payload.picture = picture;
 
-			this.props.addItem({ ...payload, id, number_in_stock: 0 });
 
-			// clear
-			this._updateState({
-				values: {
-					picture: '',
-					price: '',
-					name: ''
-				}
-			})
+			if (item.price.toString() !== price.toString())
+				payload.price = price;
 
-			this.props.close();
 
-		} catch (err) {
-			alert(getRequestErrorMessage(err));
+			if (item.name !== name)
+				payload.name = name;
+
+			if (Object.keys(payload).length === 0)
+				return alert('No changes made');
+
+			const url = `/api/outlets/${outletID}/items/${item.id}`;
+
+			try {
+				await request.patch(url, payload);
+				await this.props.updateItem(item.id, payload);
+				await this.close();
+
+			} catch (err) {
+				alert(getRequestErrorMessage(err))
+			}
+
+		} else {
+ 
+			const payload = { name, price, picture };
+			const url = `/api/outlets/${outletID}/items`;
+
+			try {
+
+				const response = await request.post(url, payload);
+				const { id } = response.data;
+
+				this.props.addItem({ ...payload, id, number_in_stock: 0 });
+				this.close();
+
+			} catch (err) {
+				alert(getRequestErrorMessage(err));
+			}
+
 		}
 	}
 
@@ -265,6 +325,28 @@ class AddItemModal extends Component {
 		});
 	}
 
+	static  pictureDataToPng(data) {
+
+		const canvas = document.createElement('canvas');
+		const img = document.createElement('img');
+		const ctx = canvas.getContext('2d');
+
+		return new Promise(resolve => {
+
+			img.onload = function() {
+				const { naturalHeight, naturalWidth } = img;
+				canvas.width = naturalWidth;
+				canvas.height = naturalHeight;
+				ctx.drawImage(img, 0, 0, naturalWidth, naturalHeight, 0, 0, naturalWidth, naturalHeight);
+				resolve(canvas.toDataURL())				
+			}
+
+			img.src = data;
+		})
+
+
+	}
+
 
 	async onPictureChange(event) {
 		
@@ -273,9 +355,42 @@ class AddItemModal extends Component {
 		if (!file)
 			return;
 
-		const picture = await AddItemModal.getDataURL(file);
+		let picture = await ItemModal.getDataURL(file);
+		picture = await ItemModal.pictureDataToPng(picture);
 		const values = { ...this.state.values, picture }
-		this._updateState({ values });
+		await this._updateState({ values });
+	}
+
+
+	async componentDidUpdate(prevProps, prevState) {
+
+		if (this.props.open === true && prevProps.open === false) {
+
+			if (this.props.mode === 'edit') {
+				const { picture, price, name } = this.props.item;
+				let { values } = this.state;
+				values = { ...values, picture, name, price };
+
+				await this._updateState({ values})
+			}
+
+		}
+	}
+
+
+	async close() {
+
+		// clear
+		await this._updateState({
+			values: {
+				picture: '',
+				price: '',
+				name: ''
+			}
+		});
+
+		await this.props.close();
+
 	}
 
 
@@ -313,7 +428,7 @@ class AddItemModal extends Component {
 
 
 				<div style={{ aspectRatio: '1', border: '1px #ccc solid' }}>
-					<img src={picture} style={{ width: '100%', height: '100%' }} />
+					<img src={picture} style={{ width: '100%', height: '100%' }} id="img-product" />
 				</div>
 
 				<input
@@ -327,8 +442,8 @@ class AddItemModal extends Component {
 			</DialogContent>
 
 			<DialogActions>
-				<Button variant="contained" color="primary" onClick={submit}>ADD</Button>
-				<Button color="primary" onClick={this.props.close}>CLOSE</Button>
+				<Button variant="contained" color="primary" onClick={submit}>SAVE</Button>
+				<Button color="primary" onClick={this.close.bind(this)}>CLOSE</Button>
 			</DialogActions>
 
 		</Dialog>

@@ -58,8 +58,8 @@ class OutletOrders extends Page {
 	}
 
 
-	_componentDidMount() {
-		this.fetchData();
+	async _componentDidMount() {
+		await this.fetchData();
 	}
 
 	state = {
@@ -75,7 +75,7 @@ class OutletOrders extends Page {
 		const updateOrderStatus = this.updateOrderStatus.bind(this);
 
 		const notLoadedJSX = dataFetched ? undefined : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-			<Button variant="contained" color="primary" onClick={this.fetchData.bind(this)}>
+			<Button variant="contained" color="primary" onClick={fetchData}>
 				retry
 			</Button>
 		</div>

@@ -6,10 +6,11 @@ import './App.css';
 
 // components
 import Navbar from './components/Navbar';
-import Loading, { showLoading, hideLoading } from './components/Loading';
+import Loading from './components/Loading';
 import StockUpdateModal from './components/StockUpdateModal';
 import Cart from './components/Cart';
-// import RemoteProxy from 'remote-proxy/frontend'
+import Footer from './components/Footer';
+
 
 // pages
 import Home from './pages/Home';
@@ -50,6 +51,7 @@ function App() {
 				<Loading />
 				<StockUpdateModal />
 				<Cart />
+				<Footer />
 
 				<Switch>
 
@@ -73,8 +75,3 @@ function App() {
 
 
 export default App;
-
-
-
-// 
-// const remote = new RemoteProxy({ url: 'http://localhost:8080', secret_key: '1' });

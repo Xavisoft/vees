@@ -37,7 +37,7 @@ class Item extends Component {
 
 		return <Grid container style = {{ paddingBottom: 0, borderBottom: '1px solid grey' }}>
 			<Grid item xs={5}>
-				<img src={picture} style={{ width: '100%', aspectRatio: '1' }} />
+				<img src={picture} style={{ width: '100%', aspectRatio: '1' }} alt={name} />
 			</Grid>
 
 			<Grid item xs={7} style={{ padding: 12 }}>

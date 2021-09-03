@@ -31,8 +31,13 @@ body {
 }
 
 .page {
-	margin-top: var(--navbar-height);
+	position: fixed;
+	right: 0;
+	left: 0;
+	top: var(--navbar-height);
 	font-family: Arial;
+	bottom: var(--footer-height);
+	overflow-y: auto;
 }
 
 

@@ -39,5 +39,34 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+
+    <script type="text/javascript">
+      // electron app methods
+
+      const { ipcRenderer } = require('electron');
+
+      if (!window.quitApp) {
+        window.quitApp = function() {
+          ipcRenderer.send('quit');
+        }
+      }
+    </script>
+
+    <script type="text/javascript">
+
+      if (!window.quitApp)
+
+        window.quitApp = navigator.app.exitApp();
+    </script>
+
+    <script type="text/javascript">
+
+      window.quitApp = function() {
+        alert('Does not work in development')
+      }
+    </script>
   </body>
+
+
+
 </html>

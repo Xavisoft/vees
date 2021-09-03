@@ -4,6 +4,7 @@
 const { Router } = require('express');
 const { Outlet, MenuItem, Order, OrderItem } = require('../models');
 const status_500 = require('../modules/status_500');
+const fs  = require('fs').promises;
 
 
 const DELIVERY_FEE = 1;
@@ -93,15 +94,73 @@ async function addItemToOutlet(req, res) {
 
 		const data = req.body;
 		data.number_in_stock = 0;
+
+		const pictureData = data.picture.replace(/^data:.+;base64,/, '');
+		data.picture = '';
 		
 		const item = await MenuItem.create(data);
 		outlet.addMenuItem(item);
-		await outlet.save();
+		item.picture = `/img/products/${item.id}.png`;
+
+		try {
+			await outlet.save();
+			await item.save();
+			await fs.writeFile(`./static/img/products/${item.id}.png`, pictureData, { encoding: 'base64' });
+		} catch (err) {
+			try {
+				await item.destroy()
+			} catch (err) {
+
+			}
+			throw err;
+			
+		}
+
 
 		res.send({ id: item.id });
 
 	} catch (err) {
 		status_500(err, res)
+	}
+}
+
+
+
+async function updateItem(req, res) {
+	
+	try {
+
+		// authentication
+		if (!req.auth)
+			return res.sendStatus(401);
+
+		const { outletID, itemID } = req.params;
+		const outlet = await Outlet.findOne({ where: { id: outletID }});
+
+		// check ownership
+		const owner = await outlet.getUser();
+		if (owner.id !== req.auth.id)
+			return res.sendStatus(403);
+
+		const item = await MenuItem.findOne({ where: { id: itemID }});
+
+		const data = req.body;
+
+		if (data.picture) {
+			const pictureData = data.picture.replace(/^data:.+;base64,/, '');
+			delete data.picture;
+			await fs.writeFile(`./static/img/products/${itemID}.png`, pictureData, { encoding: 'base64' });
+		}
+
+
+		for (let prop in data)
+			item[prop] = data[prop];
+
+		await item.save();
+		res.send('OK')
+
+	} catch (err) {
+		status_500(err, res);
 	}
 }
 
@@ -121,6 +180,9 @@ async function deleteItemFromOutlet(req, res) {
 		const owner = await outlet.getUser();
 		if (owner.id !== req.auth.id)
 			return res.sendStatus(403);
+
+		// delete image from disk
+		await fs.unlink(`./static/img/products/${itemID}.png`)
 
 		await MenuItem.destroy({ where: { id: itemID }});
 		res.send('OK');
@@ -239,6 +301,7 @@ route.post('/', createOutlet);
 route.get('/', getOutlets);
 route.get('/:id', getOutlet);
 route.post('/:outletID/items/', addItemToOutlet);
+route.patch('/:outletID/items/:itemID', updateItem);
 route.delete('/:outletID/items/:itemID', deleteItemFromOutlet);
 route.post('/:outletID/stock', updateStock);
 route.get('/:outletID/orders', getOutletOrders);

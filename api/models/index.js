@@ -37,7 +37,7 @@ Order.belongsTo(User)
 Outlet.hasMany(Order)
 User.hasMany(Order)
 Order.hasMany(OrderItem)
-OrderItem.hasOne(MenuItem)
+OrderItem.belongsTo(MenuItem)
 
 
 
